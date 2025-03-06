@@ -28,8 +28,8 @@ namespace Application.Services
                 products = await _productRepository.GetAllAsync();
 
                 var cacheOptions = new MemoryCacheEntryOptions()
-                    .SetSlidingExpiration(TimeSpan.FromMinutes(5))  // Reset waktu kalau ada akses
-                    .SetAbsoluteExpiration(TimeSpan.FromMinutes(10)); // Maksimal cache 10 menit
+                    .SetSlidingExpiration(TimeSpan.FromMinutes(5)) 
+                    .SetAbsoluteExpiration(TimeSpan.FromMinutes(10)); 
 
                 _cache.Set(productCacheKey, products, cacheOptions);
             }
@@ -54,14 +54,14 @@ namespace Application.Services
         {
 
             await _productRepository.AddAsync(product);
-            _cache.Remove(productCacheKey); // Hapus cache biar data terbaru ke-load
+            _cache.Remove(productCacheKey); 
         }
 
         public async Task UpdateProductAsync(Product product)
         {
             await _productRepository.UpdateAsync(product);
             _cache.Remove(productCacheKey);
-            _cache.Remove($"product_{product.Id}"); // Hapus cache produk spesifik
+            _cache.Remove($"product_{product.Id}"); 
         }
 
         public async Task DeleteProductAsync(int id)
