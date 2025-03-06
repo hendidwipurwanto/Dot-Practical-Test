@@ -1,4 +1,6 @@
+using Domain.Entities;
 using Infrastructure.Data;
+using Infrastructure.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -15,12 +17,12 @@ public class WeatherForecastController : ControllerBase
     };
 
     private readonly ILogger<WeatherForecastController> _logger;
-    private readonly ApplicationDbContext _context;
+    private readonly IGenericRepository<Category> _repository;
 
-    public WeatherForecastController(ILogger<WeatherForecastController> logger, ApplicationDbContext context)
+    public WeatherForecastController(ILogger<WeatherForecastController> logger, IGenericRepository<Category> repository)
     {
         _logger = logger;
-        _context = context;
+        _repository = repository;
     }
 
     [HttpGet(Name = "GetWeatherForecast")]
@@ -38,7 +40,8 @@ public class WeatherForecastController : ControllerBase
     [HttpGet("lazy")]
     public async Task<IActionResult> GetCategories()
     {
-        var categories = await _context.Categories.ToListAsync(); 
+        var categories = await _repository.GetAllAsync();
         return Ok(categories);
     }
+
 }
