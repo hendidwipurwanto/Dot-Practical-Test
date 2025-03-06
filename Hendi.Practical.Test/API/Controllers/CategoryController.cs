@@ -1,4 +1,5 @@
-﻿using Application.Services;
+﻿using Application.DTOs;
+using Application.Services;
 using Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -6,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class CategoryController : ControllerBase
@@ -29,31 +30,34 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(Category category)
+        public async Task<IActionResult> Create([FromBody]CategoryDto dto)
         {
-            try
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState); // Return error validation to frontend
+
+            var product = new Category
             {
-                await _categoryService.AddCategoryAsync(category);
-            }
-            catch (Exception ex)
-            {
+                Name = dto.Name
+            };
 
-                throw ex;
-            }
-
-
-
-
-
-            return CreatedAtAction(nameof(GetById), new { id = category.Id }, category);
+            await _categoryService.AddCategoryAsync(product);
+            return Ok(new { message = "Category created successfully!" });
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, Category category)
+        public async Task<IActionResult> Update(int id, [FromBody]CategoryDto dto)
         {
-            if (id != category.Id) return BadRequest();
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var category = await _categoryService.GetCategoryByIdAsync(id);
+            if (category== null)
+                return NotFound(new { message = "Category not found!" });
+
+            category.Name = dto.Name;
+            
             await _categoryService.UpdateCategoryAsync(category);
-            return NoContent();
+            return Ok(new { message = "Category updated successfully!" });
         }
 
         [HttpDelete("{id}")]
