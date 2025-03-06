@@ -44,4 +44,11 @@ public class WeatherForecastController : ControllerBase
         return Ok(categories);
     }
 
+    [HttpGet("test-exception")]
+    public IActionResult TestException()
+    {
+        //throw new Exception("this error testing catched by middleware from WeatherForecastController bro!");
+        throw new Exception();
+    }
+
 }
