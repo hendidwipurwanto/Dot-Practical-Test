@@ -14,6 +14,6 @@ namespace Domain.Entities
         public decimal Price { get; set; }
         public int CategoryId { get; set; }
         [JsonIgnore]
-        public virtual Category Category { get; set; } // Lazy Loading
+        public virtual Category? Category { get; set; } // Lazy Loading
     }
 }
