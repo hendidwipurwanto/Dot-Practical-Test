@@ -52,6 +52,7 @@ namespace Application.Services
 
         public async Task AddProductAsync(Product product)
         {
+
             await _productRepository.AddAsync(product);
             _cache.Remove(productCacheKey); // Hapus cache biar data terbaru ke-load
         }

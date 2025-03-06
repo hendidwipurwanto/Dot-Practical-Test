@@ -1,4 +1,5 @@
-﻿using Application.Services;
+﻿using Application.DTOs;
+using Application.Services;
 using Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -6,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
-    [Authorize]
+   // [Authorize]
 [Route("api/[controller]")]
 [ApiController]
 public class ProductController : ControllerBase
@@ -29,32 +30,39 @@ public class ProductController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(Product product)
+    public async Task<IActionResult> Create([FromBody] ProductDto dto)
     {
-            try
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState); // Return error validation to frontend
+
+            var product = new Product
             {
-                await _productService.AddProductAsync(product);
-            }
-            catch (Exception ex)
-            {
+                Name = dto.Name,
+                Price = dto.Price,
+                 CategoryId=dto.CategoryId
+            };
 
-                throw ex;
-            }
-
-
-
-
-      
-        return CreatedAtAction(nameof(GetById), new { id = product.Id }, product);
-    }
+            await _productService.AddProductAsync(product);
+            return Ok(new { message = "Product created successfully!" });
+        }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, Product product)
+    public async Task<IActionResult> Update(int id, [FromBody] ProductDto dto)
     {
-        if (id != product.Id) return BadRequest();
-        await _productService.UpdateProductAsync(product);
-        return NoContent();
-    }
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var product = await _productService.GetProductByIdAsync(id);
+            if (product == null)
+                return NotFound(new { message = "Product not found!" });
+
+            product.Name = dto.Name;
+            product.Price = dto.Price;
+            product.CategoryId = dto.CategoryId;
+
+           await _productService.UpdateProductAsync(product);
+            return Ok(new { message = "Product updated successfully!" });
+        }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
