@@ -1,4 +1,5 @@
-﻿using Domain.Entities;
+﻿using Application.DTOs;
+using Domain.Entities;
 using Infrastructure.Repositories;
 using Microsoft.Extensions.Caching.Memory;
 using System;
@@ -70,5 +71,9 @@ namespace Application.Services
             _cache.Remove($"category_{id}");
         }
 
+        public Task<CategoryDto> GetCategoryByIdAsync(string token, int id)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
