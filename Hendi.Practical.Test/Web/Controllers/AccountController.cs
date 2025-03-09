@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NuGet.Common;
 using System.IdentityModel.Tokens.Jwt;
+using System.Threading.Tasks;
 using Web.Services;
 
 
@@ -22,6 +23,14 @@ namespace Web.Controllers
         {
             return View();
         }
+
+        public ActionResult Login()
+        {
+
+
+
+            return View();
+        }
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Login(AuthRequestDto dto)
@@ -33,7 +42,7 @@ namespace Web.Controllers
        
                 _httpContextAccessor.HttpContext?.Session.SetString("token", token);
 
-                // _httpContextAccessor.HttpContext?.Session.GetString("token");
+               
 
                 return RedirectToAction("Index", "Dashboard");
                
@@ -42,57 +51,36 @@ namespace Web.Controllers
             return View();
         }
 
-
-
-        public ActionResult Login()
+        public ActionResult Logout()
         {
-           
-
+            _httpContextAccessor.HttpContext?.Session.Remove("token");
 
             return View();
         }
 
-        // GET: AccountController/Create
         public ActionResult Register()
         {
             return View();
         }
-
-        // POST: AccountController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public async Task<ActionResult> Register(RegisterRequestDto dto)
         {
-            try
+            var isSucceed = await _authService.RegisterUserAsync(dto);
+
+            if (isSucceed)
             {
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Info");
             }
-            catch
-            {
-                return View();
-            }
+
+            return View();
         }
 
-        // GET: AccountController/Edit/5
-        public ActionResult Edit(int id)
+        public ActionResult Info()
         {
             return View();
         }
 
-        // POST: AccountController/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
 
         // GET: AccountController/Delete/5
         public ActionResult Delete(int id)

@@ -1,4 +1,6 @@
-﻿using Infrastructure.Data;
+﻿using Domain.DTOs;
+using Domain.Entities;
+using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -31,8 +33,20 @@ namespace Infrastructure.Repositories
 
         public async Task AddAsync(T entity)
         {
-            await _dbSet.AddAsync(entity);
-            await _context.SaveChangesAsync();
+            try
+            {
+                await _dbSet.AddAsync(entity);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+
+
+
+          
         }
 
         public async Task UpdateAsync(T entity)
@@ -50,6 +64,9 @@ namespace Infrastructure.Repositories
                 await _context.SaveChangesAsync();
             }
         }
+
+       
+
     }
 
 }

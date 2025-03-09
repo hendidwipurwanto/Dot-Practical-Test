@@ -42,7 +42,8 @@
                                 <td>@category.Name</td>
                                 <td>
                                 @Html.ActionLink("Edit", "Edit", "Category", new { id = @category.Id }, null) |
-                                @Html.ActionLink("Delete", "Delete", "Category", new { id = category.Id }, null)</td>
+                                    @Html.ActionLink("Delete", "GetDelete", "Category", new { id = category.Id }, null)
+                                </td>
                             </tr>
                         }
                        

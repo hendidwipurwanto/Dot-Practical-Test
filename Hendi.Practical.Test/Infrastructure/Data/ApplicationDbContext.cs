@@ -34,6 +34,7 @@ namespace Infrastructure.Data
                 .HasForeignKey(p => p.CategoryId);
 
             base.OnModelCreating(modelBuilder);
+           
         }
     }
 

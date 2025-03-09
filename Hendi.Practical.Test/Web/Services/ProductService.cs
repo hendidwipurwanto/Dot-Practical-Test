@@ -2,21 +2,76 @@
 using System.Net.Http.Headers;
 using System.Net;
 using System.Text.Json;
-
+using Domain.DTOs;
+using Domain.Entities;
+using System.Text;
 namespace Web.Services
 {
     public class ProductService : IProductService
     {
         private readonly HttpClient _httpClient;
-        private string baseApi = "https://localhost:7066/api/Product";
+        private const string BaseUrl = "https://localhost:7066/api/Product";
 
         public ProductService(HttpClient httpClient)
         {
             _httpClient = httpClient;
         }
-        public async Task<List<ProductDto>> GetProductAsync(string token)
+
+        private void AddAuthorizationHeader(string token)
         {
-            var list = new List<ProductDto>();
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        }
+
+        public async Task<IEnumerable<ProductDto>> GetAllProductsAsync(string token)
+        {
+            AddAuthorizationHeader(token);
+            var response = await _httpClient.GetAsync(BaseUrl);
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<IEnumerable<ProductDto>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        }
+
+
+
+        public async Task<ProductDto> GetProductByIdAsync(int id, string token)
+        {
+            AddAuthorizationHeader(token);
+            var response = await _httpClient.GetAsync($"{BaseUrl}/{id}");
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<ProductDto>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        }
+
+        public async Task<bool> CreateProductAsync(ProductDto product, string token)
+        {
+            AddAuthorizationHeader(token);
+            var json = JsonSerializer.Serialize(product);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var response = await _httpClient.PostAsync(BaseUrl, content);
+            return response.IsSuccessStatusCode;
+        }
+
+        public async Task<bool> UpdateProductAsync(int id, ProductDto product, string token)
+        {
+            AddAuthorizationHeader(token);
+            var json = JsonSerializer.Serialize(product);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var response = await _httpClient.PutAsync($"{BaseUrl}/{id}", content);
+            return response.IsSuccessStatusCode;
+        }
+
+        public async Task<bool> DeleteProductAsync(int id, string token)
+        {
+            AddAuthorizationHeader(token);
+            var response = await _httpClient.DeleteAsync($"{BaseUrl}/{id}");
+            return response.IsSuccessStatusCode;
+        }
+
+        public async Task<IEnumerable<ProductWithCategoryDto>> GetAllProductWithCategoryAsync(string token)
+        {
+
+            //var response = await _httpClient.GetAsync("https://localhost:7066/api/Product/GetAllProductWithCategory");
+            var list = new List<ProductWithCategoryDto>();
 
             if (string.IsNullOrEmpty(token))
             {
@@ -47,7 +102,7 @@ namespace Web.Services
                 httpClient.DefaultRequestHeaders.Add("Connection", "Keep-Alive");
 
                 // Kirim request ke API
-                var response = await httpClient.GetAsync(baseApi);
+                var response = await httpClient.GetAsync("https://localhost:7066/api/Product/GetAllProductWithCategory");
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -57,7 +112,7 @@ namespace Web.Services
 
                 // Deserialize response
                 var res = await response.Content.ReadAsStringAsync();
-                list = JsonSerializer.Deserialize<List<ProductDto>>(res, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                list = JsonSerializer.Deserialize<List<ProductWithCategoryDto>>(res, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             }
             catch (HttpRequestException ex)
             {
@@ -76,12 +131,7 @@ namespace Web.Services
                 throw;
             }
 
-            return list ?? new List<ProductDto>();
-        }
-
-        public Task<ProductDto> GetProductByIdAsync(string token, int id)
-        {
-            throw new NotImplementedException();
+            return list ?? new List<ProductWithCategoryDto>();
         }
     }
 }

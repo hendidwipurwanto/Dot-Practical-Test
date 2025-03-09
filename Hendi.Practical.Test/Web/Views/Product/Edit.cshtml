@@ -1,0 +1,43 @@
+﻿@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@model Application.DTOs.ProductDto
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800"></h1>
+</div>
+<div class="col-lg-6">
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Edit Product Form</h5>
+
+            <!-- Horizontal Form -->
+            <form asp-action="Edit" method="post" asp-controller="Product">
+                @Html.AntiForgeryToken()
+                <div class="row mb-3">
+                    <label for="inputEmail3" class="col-sm-2 col-form-label">Product Name</label>
+                    <div class="col-sm-10">
+                        <input type="text" asp-for="Name" class="form-control" id="inputText">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label for="inputEmail3" class="col-sm-2 col-form-label">Price</label>
+                    <div class="col-sm-10">
+                        <input type="text" asp-for="Price" class="form-control" id="inputText">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="CategoryId" class="form-label">Category</label>
+                    <select class="form-select" id="CategoryId" name="CategoryId" asp-items="ViewBag.Categories">
+                        <option value="">-- Select Category --</option>
+                    </select>
+                </div>
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form><!-- End Horizontal Form -->
+
+        </div>
+    </div>

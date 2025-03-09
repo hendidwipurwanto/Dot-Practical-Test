@@ -39,7 +39,7 @@ namespace Web.Services
             return result?.Token; 
         }
 
-        public async Task<string> RegisterUserAsync(RegisterRequestDto dto)
+        public async Task<bool> RegisterUserAsync(RegisterRequestDto dto)
         {
             var jsonContent = JsonSerializer.Serialize(dto);
             var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
@@ -49,12 +49,11 @@ namespace Web.Services
 
             if (response.IsSuccessStatusCode)
             {
-                return "User registered successfully!";
+                return true;
             }
             else
-            {
-                var errorResponse = await response.Content.ReadAsStringAsync();
-                return $"Failed to register user: {errorResponse}";
+            {               
+                return false;
             }
         }
     }

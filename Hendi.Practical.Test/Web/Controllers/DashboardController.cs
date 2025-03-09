@@ -24,11 +24,11 @@ namespace Web.Controllers
             var token = _httpContextAccessor.HttpContext?.Session.GetString("token");
             try
             {
-                var categories = await _categoryService.GetCategoriesAsync(token);
-                ViewBag.Categories = categories.Count;
+                var categories = await _categoryService.GetAllCategoriesAsync(token);
+                ViewBag.Categories = categories.ToList().Count;
 
-                var products = await _productService.GetProductAsync(token);
-                ViewBag.products = products.Count;
+                var products = await _productService.GetAllProductsAsync(token);
+                ViewBag.products = products.ToList().Count;
             }
             catch (Exception ex)
             {
