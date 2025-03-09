@@ -22,7 +22,7 @@ namespace Web.Controllers
         {
 
             var token = _httpContextAccessor.HttpContext?.Session.GetString("token");
-            var result = await _categoryService.GetCategoriesAsync(token);
+            var result = await _categoryService.GetAllCategoriesAsync(token);
 
 
             return View(result);
@@ -46,7 +46,7 @@ namespace Web.Controllers
         {
             bool isSucceed = false;
             var token = _httpContextAccessor.HttpContext?.Session.GetString("token");
-           isSucceed =  await _categoryService.CreateAsync(dto, token);
+           isSucceed =  await _categoryService.CreateCategoryAsync(dto, token);
 
             if (isSucceed)
             {
@@ -72,56 +72,54 @@ namespace Web.Controllers
         }
 
         // GET: CategoryController/Edit/5
-        public ActionResult Edit(int id)
+        public async Task<ActionResult> Edit(int id)
         {
-            return View();
+            var token = _httpContextAccessor.HttpContext?.Session.GetString("token");
+            var model = await _categoryService.GetCategoryByIdAsync(id,token);
+
+            return View(model);
         }
-        /*
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Edit(CategoryDto dto, int id)
         {
             var token = _httpContextAccessor.HttpContext?.Session.GetString("token");
-          //  var dto = await _categoryService.GetCategoriesAsync(token, id);
-
-
-           // return View(dto);
-        } */
-
-        // POST: CategoryController/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
-        {
-            try
+          
+            var isSucceed = await _categoryService.UpdateCategoryAsync(id,dto,token);
+            if (isSucceed)
             {
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("index");
             }
-            catch
-            {
-                return View();
-            }
+
+            return View(dto);
         }
 
-        // GET: CategoryController/Delete/5
-        public ActionResult Delete(int id)
+        public async Task<ActionResult> GetDelete(int id)
         {
-            return View();
+            var token = _httpContextAccessor.HttpContext?.Session.GetString("token");
+            var model = await _categoryService.GetCategoryByIdAsync(id, token);
+
+            return View(model);
         }
 
         // POST: CategoryController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public async Task<ActionResult> Delete(int id)
         {
-            try
+            var token = _httpContextAccessor.HttpContext?.Session.GetString("token");
+           var isSucceed =  await _categoryService.DeleteCategoryAsync(id, token);
+
+            if (isSucceed)
             {
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("index");
             }
-            catch
-            {
-                return View();
-            }
+
+
+
+            return View();
+           
         }
     }
 }

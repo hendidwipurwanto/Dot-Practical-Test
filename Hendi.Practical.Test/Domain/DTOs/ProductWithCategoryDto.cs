@@ -1,19 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.DTOs
+namespace Domain.DTOs
 {
-    public class ProductDto
+    public class ProductWithCategoryDto
     {
         public int Id { get; set; }
-        [Required(ErrorMessage = "The Name field is required.")]
         public string Name { get; set; }
-        [Range(0, double.MaxValue, ErrorMessage = "Price should be greather or equal by 0.")]
         public decimal Price { get; set; }
         public int CategoryId { get; set; }
+        public string CategoryName { get; set; }
     }
 }

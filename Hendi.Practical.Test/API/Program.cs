@@ -19,6 +19,7 @@ var secretKey = Encoding.UTF8.GetBytes(jwtSettings["SecretKey"] ?? throw new Inv
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<ISpecificRepository, SpecificRepository>();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
@@ -91,5 +92,28 @@ app.UseAuthorization();
 
 
 app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    dbContext.Database.Migrate(); // Pastikan database selalu up-to-date
+
+    if (!dbContext.Categories.Any()) // Cek apakah kategori sudah ada
+    {
+        // Reset identity untuk menghindari primary key conflict
+        dbContext.Database.ExecuteSqlRaw("DBCC CHECKIDENT ('Categories', RESEED, 0)");
+
+        dbContext.Categories.AddRange(new List<Category>
+        {
+            new Category { Name = "Electronic" },
+            new Category { Name = "Clothes" },
+            new Category { Name = "Sport" }
+        });
+
+        dbContext.SaveChanges();
+    }
+}
+
+
 
 app.Run();

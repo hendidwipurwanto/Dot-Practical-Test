@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
- [Authorize]
+// [Authorize]
 [Route("api/[controller]")]
 [ApiController]
 public class ProductController : ControllerBase
@@ -70,6 +70,13 @@ public class ProductController : ControllerBase
         await _productService.DeleteProductAsync(id);
         return NoContent();
     }
-}
+
+        [HttpGet("GetAllProductWithCategory")]
+        public async Task<IActionResult> GetAllProductWithCategory()
+        {
+            var categories = await _productService.GetAllProductWithCategoryAsync();
+            return Ok(categories);
+        }
+    }
 
 }

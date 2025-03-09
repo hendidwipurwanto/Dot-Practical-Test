@@ -1,14 +1,32 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿
+using Application.DTOs;
+using Domain.Entities;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Threading.Tasks;
+using Web.Services;
 
 namespace Web.Controllers
 {
     public class ProductController : Controller
     {
-        // GET: ProductController
-        public ActionResult Index()
+        private readonly IProductService _productService;
+        private readonly ICategoryService _categoryService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        public ProductController(IProductService productService, IHttpContextAccessor httpContextAccessor, ICategoryService categoryService)
         {
-            return View();
+            _productService = productService;
+            _httpContextAccessor = httpContextAccessor;
+            _categoryService = categoryService;
+        }
+        // GET: ProductController
+        public async Task<ActionResult> Index()
+        {
+            var token = _httpContextAccessor.HttpContext?.Session.GetString("token");
+            var product = await _productService.GetAllProductWithCategoryAsync(token);
+
+            return View(product);
         }
 
         // GET: ProductController/Details/5
@@ -18,66 +36,87 @@ namespace Web.Controllers
         }
 
         // GET: ProductController/Create
-        public ActionResult Create()
+        public async Task<ActionResult> Create()
         {
+            var token = _httpContextAccessor.HttpContext?.Session.GetString("token");
+            var categories = await _categoryService.GetAllCategoriesAsync(token);
+            ViewBag.Categories = new SelectList(categories, "Id", "Name");
+            return View();
+
+
             return View();
         }
 
         // POST: ProductController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public async Task<ActionResult> CreateItem(ProductDto dto)
         {
-            try
+            var token = _httpContextAccessor.HttpContext?.Session.GetString("token");
+            var isSucceed = await _productService.CreateProductAsync(dto, token);
+            if (isSucceed)
             {
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Index");
             }
-            catch
-            {
-                return View();
-            }
+
+            return View();
         }
 
         // GET: ProductController/Edit/5
-        public ActionResult Edit(int id)
+        public async Task<ActionResult> Edit(int id)
         {
-            return View();
+            var token = _httpContextAccessor.HttpContext?.Session.GetString("token");
+            var categories = await _categoryService.GetAllCategoriesAsync(token);
+            var product = await _productService.GetProductByIdAsync(id, token);
+
+            ViewBag.Categories = new SelectList(categories, "Id", "Name", product.CategoryId); // Set default value
+
+            return View(product);
         }
 
         // POST: ProductController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public async Task<ActionResult> Edit(int id, ProductDto dto)
         {
-            try
+            var token = _httpContextAccessor.HttpContext?.Session.GetString("token");
+
+            var isSucceed = await _productService.UpdateProductAsync(id, dto, token);
+
+            if (isSucceed)
             {
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Index");
             }
-            catch
-            {
-                return View();
-            }
+
+
+            return View();
         }
 
         // GET: ProductController/Delete/5
-        public ActionResult Delete(int id)
+        public async Task<ActionResult> GetDelete(int id)
         {
-            return View();
+            var token = _httpContextAccessor.HttpContext?.Session.GetString("token");
+            var product = await _productService.GetProductByIdAsync(id, token);
+            
+
+            return View(product);
         }
 
         // POST: ProductController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public async Task<ActionResult> Delete(int id)
         {
-            try
+            var token = _httpContextAccessor.HttpContext?.Session.GetString("token");
+            var isSucceed = await _productService.DeleteProductAsync(id, token);
+            if(isSucceed)
             {
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Index");
             }
-            catch
-            {
-                return View();
-            }
+
+
+
+            return View();
         }
     }
 }

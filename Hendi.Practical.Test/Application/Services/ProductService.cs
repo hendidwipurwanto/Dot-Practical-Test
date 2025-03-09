@@ -1,10 +1,9 @@
-﻿using Domain.Entities;
+﻿using Domain.DTOs;
+using Domain.Entities;
 using Infrastructure.Repositories;
 using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Application.Services
@@ -12,27 +11,41 @@ namespace Application.Services
     public class ProductService : IProductService
     {
         private readonly IGenericRepository<Product> _productRepository;
+        private readonly ISpecificRepository _specificRepository;
         private readonly IMemoryCache _cache;
         private readonly string productCacheKey = "productList";
-
-        public ProductService(IGenericRepository<Product> productRepository, IMemoryCache cache)
+        public ProductService(IGenericRepository<Product> productRepository, IMemoryCache cache, ISpecificRepository specificRepository)
         {
             _productRepository = productRepository;
             _cache = cache;
+            _specificRepository = specificRepository;
         }
+
+        public async Task<IEnumerable<ProductWithCategoryDto>> GetAllProductWithCategoryAsync()
+        {
+
+            if (!_cache.TryGetValue(productCacheKey, out IEnumerable<ProductWithCategoryDto> productwithcategory))
+            {
+                productwithcategory = await _specificRepository.GetAllProductWithCategoryAsync();
+
+                var cacheOptions = new MemoryCacheEntryOptions()
+                    .SetSlidingExpiration(TimeSpan.FromMinutes(5))  // Reset waktu kalau ada akses
+                    .SetAbsoluteExpiration(TimeSpan.FromMinutes(10)); // Maksimal cache 10 menit
+
+                _cache.Set(productCacheKey, productwithcategory, cacheOptions);
+            }
+
+
+            return productwithcategory;
+        }
+
 
         public async Task<IEnumerable<Product>> GetProductsAsync()
         {
-            if (!_cache.TryGetValue(productCacheKey, out IEnumerable<Product> products))
-            {
-                products = await _productRepository.GetAllAsync();
+           
+             var   products = await _productRepository.GetAllAsync();
 
-                var cacheOptions = new MemoryCacheEntryOptions()
-                    .SetSlidingExpiration(TimeSpan.FromMinutes(5)) 
-                    .SetAbsoluteExpiration(TimeSpan.FromMinutes(10)); 
-
-                _cache.Set(productCacheKey, products, cacheOptions);
-            }
+              
             return products;
         }
 
@@ -44,7 +57,7 @@ namespace Application.Services
                 product = await _productRepository.GetByIdAsync(id);
                 if (product != null)
                 {
-                    _cache.Set(cacheKey, product, TimeSpan.FromMinutes(5));
+                    _cache.Set(cacheKey, product, TimeSpan.FromMinutes(10));
                 }
             }
             return product;
@@ -52,16 +65,15 @@ namespace Application.Services
 
         public async Task AddProductAsync(Product product)
         {
-
             await _productRepository.AddAsync(product);
-            _cache.Remove(productCacheKey); 
+            _cache.Remove(productCacheKey);
         }
 
         public async Task UpdateProductAsync(Product product)
         {
             await _productRepository.UpdateAsync(product);
             _cache.Remove(productCacheKey);
-            _cache.Remove($"product_{product.Id}"); 
+            _cache.Remove($"category_{product.Id}"); // Hapus cache kategori spesifik
         }
 
         public async Task DeleteProductAsync(int id)
@@ -70,6 +82,7 @@ namespace Application.Services
             _cache.Remove(productCacheKey);
             _cache.Remove($"product_{id}");
         }
-    }
 
+
+    }
 }
