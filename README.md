@@ -12,3 +12,4 @@
 
 5. you ready to go tu run this App
 6. Create your Account first the login to the App
+7. Done
