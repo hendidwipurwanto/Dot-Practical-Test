@@ -1,6 +1,6 @@
 # Dot-Practical-Test
 
-**How to run to your local PC**
+**How to run in your local PC**
 
 1. clone this code into your local machine
 2. change the connection string in API project Appsetting.json(make sure it is correct because it will automatically seeding the category table)
